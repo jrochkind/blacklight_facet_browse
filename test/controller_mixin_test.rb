@@ -40,7 +40,9 @@ describe BlacklightFacetBrowse::ControllerMixin do
           {}
         end
 
-        def original_output ; {:"facet.field" => "original", "other" => "other"} ; end
+        def original_output
+          @original_output ||= {:"facet.field" => "original", "other" => "other"}
+        end
       end)
 
       include BlacklightFacetBrowse::ControllerMixin
@@ -93,7 +95,18 @@ describe BlacklightFacetBrowse::ControllerMixin do
         assert output["facet.prefix"].present?, "adds facet.prefix"
         assert_equal @keygen.search_key("foo"), output["facet.prefix"], "creates proper facet.prefix with keygen"
       end
+
+      it "copies field-specific limit and sort" do
+        @controller.original_output.merge!(:"f.subject_facet.facet.sort" => "index", :"f.subject_facet.facet.limit" => 25)
+        
+        output = @controller.solr_facet_params("subject_facet", "facet.begins_with" => "foo")
+
+        assert_equal 25,       output[:"f.subject_browse_facet.facet.limit"]
+        assert_equal "index",  output[:"f.subject_browse_facet.facet.sort"]
+      end
     end
+
+
 
   end
 

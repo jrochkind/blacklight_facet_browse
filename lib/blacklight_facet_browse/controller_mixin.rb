@@ -30,6 +30,15 @@ module BlacklightFacetBrowse
         # switch the facet.field to our configured browse field companion
         solr_params[:"facet.field"] = conf_ext.browse_field
 
+        # Copy over field-specific sort and limit, if present
+        if limit = solr_params[:"f.#{facet_field}.facet.limit"]
+          solr_params[:"f.#{conf_ext.browse_field}.facet.limit"] = limit
+        end
+        if sort = solr_params[:"f.#{facet_field}.facet.sort"]
+          solr_params[:"f.#{conf_ext.browse_field}.facet.sort"] = sort
+        end
+
+        # Add facet.prefix if we have a browse query
         if browse_query
           search_key = conf_ext.key_generator.search_key(browse_query)
           solr_params["facet.prefix"] = search_key
