@@ -37,6 +37,10 @@ module BlacklightFacetBrowse
       ! browse_field.nil?
     end
 
+    def browsable_facet_template
+      _lookup("browseable_facet_template", "browsable_facet")
+    end
+
     # Extracts key generator from either field-specific
     # or general config. Or WILL RAISE if none is supplied!
     # No defaults for key generator, you need to specify,
@@ -49,6 +53,11 @@ module BlacklightFacetBrowse
       end
 
       return keygen
+    end
+
+
+    def _lookup(key, default)
+      facet_field_config[key] || general_config[key] || default
     end
     
   end

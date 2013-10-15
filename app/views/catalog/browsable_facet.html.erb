@@ -1,0 +1,29 @@
+<%# overall structure of this partial copied from BL 3.5 version of facet.html.erb:
+https://raw.github.com/projectblacklight/blacklight/v3.5.0/app/views/catalog/facet.html.erb
+
+For more recent Bootstraped blacklight, you'd want to create an alternate
+version based on more recent version of facet.html.erb, wtih proper
+structure for bootstrapped CSS. You can tell BlacklightFacetBrowse
+the name of a view template to use for browsable facet display
+in config variable 'browsable_facet_template' 
+%>
+
+<div class="facet_extended_list">
+
+  <%= render "facet_browse_search_form" %>      
+  
+  <% sidebar_items << capture do %>
+  <p><%= link_back_to_catalog %></p>
+  <% end %>
+  <div class="facet_pagination top">
+    <%= render :partial=>'facet_pagination' %>
+  </div>
+  
+  <h3><%= facet_field_labels[params[:id]] %></h3>
+  
+  <%= render "facet_browse_list", :paginator => @pagination %>
+  
+  <div class="facet_pagination bottom">
+    <%= render :partial=>'facet_pagination' %>
+  </div>
+</div>

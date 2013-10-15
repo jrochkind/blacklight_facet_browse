@@ -9,7 +9,12 @@ require 'blacklight_facet_browse/key_generator_v1'
 
 # We do NOT currently integration test in a real Blacklight app,
 # or really a real Rails app. This is just mocked unit testing
-# in isolation. 
+# in isolation, with a mocked application environment provided by
+# our mock_controller_class. 
+#
+# Experiment to see how this does us -- it's definitely got some
+# problems, but I just couldn't deal with actual integration testing
+# inside a rails app.
 describe BlacklightFacetBrowse::ControllerMixin do
   # We tried to use a real Blacklight::Configuration object, but BL
   # made it too hard, we'll just make a Hashie that simulates it,
@@ -27,6 +32,10 @@ describe BlacklightFacetBrowse::ControllerMixin do
       # to make it easy for tests to set it, set it to our
       # internal Conf class for faking a BL configuration. 
       attr_accessor :blacklight_config
+      attr_writer :params, :original_output
+
+      # some things we use to see what was called on the mock
+      attr_reader :super_facet_called
       
       # include anon module pretending to be superclass,
       # so our mixin can override and call super
@@ -36,12 +45,24 @@ describe BlacklightFacetBrowse::ControllerMixin do
           return original_output
         end
 
+        # base implementation so we can call super, but we'll
+        # do nothing but register it. 
+        def facet
+          @super_facet_called = true
+        end
+
+        # superclass imp so module can call it, no-op
+        def get_facet_pagination(*args)
+        end
+        def respond_to(*args)
+        end
+
         def params
-          {}
+          @params ||= Conf.new
         end
 
         def original_output
-          @original_output ||= {:"facet.field" => "original", "other" => "other"}
+          @original_output ||= Conf.new(:"facet.field" => "original", "other" => "other")
         end
       end)
 
@@ -105,9 +126,27 @@ describe BlacklightFacetBrowse::ControllerMixin do
         assert_equal "index",  output[:"f.subject_browse_facet.facet.sort"]
       end
     end
+  end
 
-
-
+  describe "#facet action method" do
+    describe "for a facet field not configured for browse" do
+      before do 
+        @controller.params.merge!("id" => "other_facet")
+      end
+      it "calls super" do        
+        @controller.facet
+        assert @controller.super_facet_called, "facet super imp registered as called"
+      end
+    end
+    describe "for a facet configured for browse" do
+      before do
+        @controller.params.merge!("id" => "subject_facet")
+      end
+      it "does not call super" do
+        @controller.facet
+        refute @controller.super_facet_called, "facet super imp NOT registered as called"
+      end
+    end
   end
 
 

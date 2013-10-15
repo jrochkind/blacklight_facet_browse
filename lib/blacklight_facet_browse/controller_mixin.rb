@@ -1,4 +1,5 @@
 require 'blacklight_facet_browse/config_info'
+require 'blacklight_facet_browse/normal_form'
 require 'active_support'
 
 module BlacklightFacetBrowse
@@ -47,5 +48,43 @@ module BlacklightFacetBrowse
 
       return solr_params
     end
+  
+    # We override facet to use our custom views that can handle
+    # browse normalized facets. If the facet isn't configured
+    # for browse, we just call super though. 
+    def facet
+      @browse_config = BlacklightFacetBrowse::ConfigInfo.new(blacklight_config, params[:id])
+
+      if ! @browse_config.browse_configured?
+        # first do no harm, do nothing if the facet ain't configured
+        # for browse. 
+        super
+      else
+        # Mostly copied from current BL 4.4, although will work
+        # with older BL, in some cases adding features. 
+
+        @pagination = get_facet_pagination(params[:id], params)
+
+        respond_to do |format|        
+          format.html do 
+            # we're going to use a custom view, possibly user specified,
+            # but the default is "browsable_facet"
+            render @browse_config.browsable_facet_template
+          end
+
+          # Draw the partial for the "more" facet modal window,
+          # without layout. 
+          format.js { render @browse_config.browsable_facet_template, :layout => false }
+
+          # Json format copied from BL 4.4, there was no json response in
+          # BL 3.5, we need one, sure let's use that one to try and be compat.  
+          #format.json { render json: {response: {facets: @pagination }}}
+
+        end
+      end
+    end
+  
+
+
   end
 end
