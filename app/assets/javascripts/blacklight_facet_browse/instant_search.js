@@ -1,60 +1,31 @@
 (function($) {
 
-//throttle stolen from bootstrap typeahead. 
-  // https://github.com/twitter/typeahead.js/blob/master/src/utils.js#L115
-  function throttle(func, wait) {
-    var context, args, timeout, result, previous, later;
 
-    previous = 0;
-    later = function() {
-      previous = new Date();
-      timeout = null;
-      result = func.apply(context, args);
-    };
 
+  //debounce taken from underscore library. 
+  var debounce = function(func, wait, immediate) {
+    var timeout, args, context, timestamp, result;
     return function() {
-      var now = new Date(),
-          remaining = wait - (now - previous);
-
       context = this;
       args = arguments;
-
-      if (remaining <= 0) {
-        clearTimeout(timeout);
-        timeout = null;
-        previous = now;
-        result = func.apply(context, args);
+      timestamp = new Date();
+      var later = function() {
+        var last = (new Date()) - timestamp;
+        if (last < wait) {
+          timeout = setTimeout(later, wait - last);
+        } else {
+          timeout = null;
+          if (!immediate) result = func.apply(context, args);
+        }
+      };
+      var callNow = immediate && !timeout;
+      if (!timeout) {
+        timeout = setTimeout(later, wait);
       }
-
-      else if (!timeout) {
-        timeout = setTimeout(later, remaining);
-      }
-
+      if (callNow) result = func.apply(context, args);
       return result;
     };
   };
-
-  function debounce(func, wait, immediate) {
-    var timeout, result;
-
-    return function() {
-      var context = this, args = arguments, later, callNow;
-
-      later = function() {
-        timeout = null;
-        if (!immediate) { result = func.apply(context, args); }
-      };
-
-      callNow = immediate && !timeout;
-
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-
-      if (callNow) { result = func.apply(context, args); }
-
-      return result;
-    };
-  }
 
   var last_fetched = null;
   var update = function() {
@@ -66,6 +37,8 @@
 
     if (q !== last_fetched) {
           console.log("fetching for " + q)
+
+      $(this).closest("form").find(".facet-browse-loading").addClass("active")          
       last_fetched = q;       
       $.ajax({
         url:      uri,
@@ -80,7 +53,9 @@
           // jquery "load" function feature
           var extracted_data = $("<div>").append( $.parseHTML( data ) ).find( replace_content_selector );
 
-          form.closest(".facet_extended_list").find(replace_content_selector).replaceWith(extracted_data);   
+          form.closest(".facet_extended_list").find(replace_content_selector).replaceWith(extracted_data); 
+
+          $(form).find(".facet-browse-loading").removeClass("active")  
         }
       });
     }
@@ -108,6 +83,9 @@
 
     if (new_value !== last_value) {
       last_value = new_value;
+
+      $(this).closest("form").find(".facet-browse-loading").addClass("active")
+
       debounce(update, 300).apply(this);
     }
   });

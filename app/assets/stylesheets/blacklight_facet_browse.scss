@@ -1,0 +1,18 @@
+/* These styles will prob have to be updated for recent
+   BL with bootstrap, they were written for old BL */
+
+.facet_extended_list .facet-browse-search-q {
+  // Make it bigger 
+  font-size: 16px;
+  width: 18em;  
+}
+
+// turn on the spinner while we're loading
+.facet-browse-loading.active {
+  display: inline-block;
+  vertical-align: bottom;
+  height: 26px;
+  width: 16px;
+  background: image-url('spinner.gif') right no-repeat;
+  background-position: 0 4;
+}

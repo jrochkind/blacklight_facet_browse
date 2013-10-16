@@ -1,6 +1,6 @@
 <%= form_tag({}, :method => :get, :class => "facet_browse_search") do %>
-  <%= search_field_tag @browse_config.query_param_name, params[@browse_config.query_param_name], :id => nil, :placeholder => "starting with…", :autocomplete => "off" %>
-  <%= submit_tag t('blacklight.search.form.submit'), :class=>'submit' %>
+  <%= search_field_tag @browse_config.query_param_name, params[@browse_config.query_param_name], :id => nil, :placeholder => "starting with…", :autocomplete => "off", :class => "facet-browse-search-q" %>
+  <span class="facet-browse-loading"></span>
 
   <%# search always resets sort to 'index', otherwise it's confusing %>
   <%= hidden_field_tag "catalog_facet.sort", "index" %>
