@@ -2,7 +2,9 @@
   <%= search_field_tag @browse_config.query_param_name, params[@browse_config.query_param_name], :id => nil, :placeholder => "starting with…", :autocomplete => "off" %>
   <%= submit_tag t('blacklight.search.form.submit'), :class=>'submit' %>
 
-  <%= search_as_hidden_fields(:omit_keys => [@browse_config.query_param_name, :page, :id, :'catalog_facet.offset', :commit]).html_safe %>        
+  <%# search always resets sort to 'index', otherwise it's confusing %>
+  <%= hidden_field_tag "catalog_facet.sort", "index" %>
+  <%= search_as_hidden_fields(:omit_keys => [@browse_config.query_param_name, :page, :id, :'catalog_facet.offset', :'catalog_facet.sort', :commit]).html_safe %>        
 
 <% end %>
   
