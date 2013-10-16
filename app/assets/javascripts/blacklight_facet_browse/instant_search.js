@@ -1,6 +1,17 @@
 (function($) {
 
+  var deparam = function (querystring) {
+    // remove any preceding url and split
+    querystring = querystring.substring(querystring.indexOf('?')+1).split('&');
+    var params = {}, pair, d = decodeURIComponent;
+    // march and parse
+    for (var i = querystring.length - 1; i >= 0; i--) {
+      pair = querystring[i].split('=');
+      params[d(pair[0])] = d(pair[1]);
+    }
 
+    return params;
+  };//--  fn  deparam
 
   //debounce taken from underscore library. 
   var debounce = function(func, wait, immediate) {
@@ -27,41 +38,43 @@
     };
   };
 
-  var last_fetched = null;
-  var update = function() {
-    console.log("updating made it through debounce")
+  var updates_in_progress = 0;
+  var update = function(text_field) {
 
-    var form     = $(this).closest("form");
+    var form     = $(text_field).closest("form");
     var uri      = form.attr("action");
     var q        = form.serialize();
 
-    if (q !== last_fetched) {
-          console.log("fetching for " + q)
+    var s = deparam(q)["facet.begins_with"]
+    console.log("update called, with field at " + s );
 
-      $(this).closest("form").find(".facet-browse-loading").addClass("active")          
-      last_fetched = q;       
-      $.ajax({
-        url:      uri,
-        data:     q,
-        dataType: "html",
-        success: function(data) {
-          console.log("results in")
-          var replace_content_selector = "*[data-instant-search=content]"
+    $(this).closest("form").find(".facet-browse-loading").addClass("active")          
 
+    updates_in_progress++;
 
-          // pull out just the div we want, using code copied from
-          // jquery "load" function feature
-          var extracted_data = $("<div>").append( $.parseHTML( data ) ).find( replace_content_selector );
+    $.ajax({
+      url:      uri,
+      data:     q,
+      dataType: "html",
+      success: function(data) {
+        console.log("results in")
 
-          form.closest(".facet_extended_list").find(replace_content_selector).replaceWith(extracted_data); 
+        var replace_content_selector = "*[data-instant-search=content]"
 
-          $(form).find(".facet-browse-loading").removeClass("active")  
-        }
-      });
-    }
-      
-    
+        // pull out just the div we want, using code copied from
+        // jquery "load" function feature
+        var extracted_data = $("<div>").append( $.parseHTML( data ) ).find( replace_content_selector );
+
+        form.closest(".facet_extended_list").find(replace_content_selector).replaceWith(extracted_data); 
+
+        updates_in_progress--;
+
+        if (updates_in_progress === 0)
+          $(form).find(".facet-browse-loading").removeClass("active");
+      }
+    });
   };
+  update = debounce(update, 400);
 
 
   var last_value = null;
@@ -82,11 +95,12 @@
       last_value = new_value;
 
     if (new_value !== last_value) {
+      console.log("actual change: " + new_value)
       last_value = new_value;
 
       $(this).closest("form").find(".facet-browse-loading").addClass("active")
 
-      debounce(update, 300).apply(this);
+      update(this);
     }
   });
 
