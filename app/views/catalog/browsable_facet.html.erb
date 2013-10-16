@@ -15,15 +15,21 @@ in config variable 'browsable_facet_template'
   <% sidebar_items << capture do %>
   <p><%= link_back_to_catalog %></p>
   <% end %>
-  <div class="facet_pagination top">
-    <%= render :partial=>'facet_pagination' %>
-  </div>
-  
-  <h3><%= facet_field_labels[params[:id]] %></h3>
-  
-  <%= render "facet_browse_list", :paginator => @pagination %>
-  
-  <div class="facet_pagination bottom">
-    <%= render :partial=>'facet_pagination' %>
+
+  <%# div with this data-X has to be there, for AJAX instant
+      search to pull out the right part to update on pate %>
+  <div data-instant-search="content" class="facet-browse-instant-search-content">
+
+    <div class="facet_pagination top">
+      <%= render :partial=>'facet_pagination' %>
+    </div>
+    
+    <h3><%= facet_field_labels[params[:id]] %></h3>
+    
+    <%= render "facet_browse_list", :paginator => @pagination %>
+    
+    <div class="facet_pagination bottom">
+      <%= render :partial=>'facet_pagination' %>
+    </div>
   </div>
 </div>
