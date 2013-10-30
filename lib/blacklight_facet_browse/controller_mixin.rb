@@ -88,13 +88,11 @@ module BlacklightFacetBrowse
     # used for ajax 'starts with' search limiting.
     def facet_limit_content
       browse_config = BlacklightFacetBrowse::ConfigInfo.new(blacklight_config, params[:id])
-      pagination = get_facet_pagination(params[:id], params)
+      pagination    = get_facet_pagination(params[:id], params)
 
-      # Based off the Blacklight #render_facet_limit helper, but we
-      # can't just easily re-use it, for various reasons. 
-      #
-      # A bit fragile getting the right 'locals', what can you do. 
-      render :partial=>"browsable_facet_limit", :layout => false, 
+      partial       = browse_config.facet_field_config[:partial] || "browsable_facet_limit"
+
+      render :partial=>partial, :layout => false, 
         :locals => {:display_facet => pagination, :solr_field => params[:id], :facet_field => browse_config.facet_field_config}
     end
 
