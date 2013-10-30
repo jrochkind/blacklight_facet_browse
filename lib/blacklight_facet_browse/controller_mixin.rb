@@ -61,9 +61,10 @@ module BlacklightFacetBrowse
         super
       else
         # Mostly copied from current BL 4.4, although will work
-        # with older BL, in some cases adding features. 
+        # with older BL, in some cases adding features. Use
+        # our custom get_browse_facet_pagination
 
-        @pagination = get_facet_pagination(params[:id], params)
+        @pagination = get_browse_facet_pagination(params[:id], params)
 
         respond_to do |format|        
           format.html do 
@@ -88,16 +89,71 @@ module BlacklightFacetBrowse
     # used for ajax 'starts with' search limiting.
     def facet_limit_content
       browse_config = BlacklightFacetBrowse::ConfigInfo.new(blacklight_config, params[:id])
+      browse_field  = browse_config.browse_field
 
-      # insist on sorting alphabetically for our sidebar prefix limit,
-      # too confusing otherwise. 
-      pagination    = get_facet_pagination(params[:id], params.merge(:"facet.sort" => "index"))
+      # insist on sorting alphabetically for our sidebar prefix limit
+      # if we have a prefix query -- too confusing otherwise. 
+      force_solr_params = {}
+      if params[ browse_config.query_param_name ].present?
+         force_solr_params[:"f.#{browse_field}.facet.sort"] = "index"
+       end
+      pagination    = get_browse_facet_pagination(params[:id], params, force_solr_params)
 
       partial       = browse_config.facet_field_config[:partial] || "browsable_facet_limit"
 
       render :partial=>partial, :layout => false, 
         :locals => {:paginator => pagination, :solr_field => params[:id], :facet_field => browse_config.facet_field_config}
     end
+
+    protected
+
+    # A customized version of Blacklight's SolrHelper#get_facet_pagination 
+    # that we use for getting facet values from Solr and wrapping them in a Pagination object
+    # -- BUT WITH respect for facet.prefix.  There are a few other things it needs to do too. 
+    #
+    # Originally we tried to use the original BL get_facet_pagination and over-ride
+    # other parts, but ran into barriers, including different behavior in different
+    # BL versions in ways that effected us, as well as BL's continued confusion
+    # between app params and extra_solr_params. 
+    #
+    # In this method, 'app_params' are the params from the user-facing
+    # application itself, from the app's own URL.  extra_solr_params
+    # are parameters for the request we're going to make to solr, that
+    # we want to forcefully merge in before we make the solr request. We
+    # do our best to keep em separate. 
+    def get_browse_facet_pagination(facet_field, app_params=params, extra_solr_params = {})
+      solr_params = solr_facet_params(facet_field, app_params.dup, {})
+      solr_params = solr_params.deep_merge(extra_solr_params)
+      
+      # Make the solr call -- whether what we need is stored in 'qt' or 'request_handler'
+      # may depend on BL version, gah. 
+      request_handler = blacklight_config.qt || blacklight_config.solr_request_handler
+      response =find(request_handler, solr_params)
+
+      # This is a BL 3.5 version of finding limit, master doesn't look
+      # at :facet_list_limit?
+      limit =       
+        if respond_to?(:facet_list_limit)
+          facet_list_limit.to_s.to_i
+        elsif solr_params[:"f.#{facet_field}.facet.limit"]
+          solr_params[:"f.#{facet_field}.facet.limit"] - 1
+        else
+          nil
+        end
+      
+      # Actually create the paginator!
+      # NOTE: The sniffing of the proper sort from the solr response is not
+      # currently tested for, tricky to figure out how to test, since the
+      # default setup we test against doesn't use this feature. 
+      return     Blacklight::Solr::FacetPaginator.new(response.facets.first.items, 
+        :offset => solr_params[:"f.#{facet_field}.facet.offset"] || solr_params['facet.offset'], 
+        :limit => limit,
+        :sort => response["responseHeader"]["params"]["f.#{facet_field}.facet.sort"] || response["responseHeader"]["params"]["facet.sort"]
+      )
+    end
+
+
+
 
   end
 end
