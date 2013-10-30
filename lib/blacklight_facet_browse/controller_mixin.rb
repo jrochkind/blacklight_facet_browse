@@ -60,9 +60,16 @@ module BlacklightFacetBrowse
         # for browse. 
         super
       else
-        # Mostly copied from current BL 4.4, although will work
+        # Mostly copied and modified from current BL 4.4, although will work
         # with older BL, in some cases adding features. Use
         # our custom get_browse_facet_pagination
+
+        # If no other sort is specified, and we have no prefix query,
+        # insist on defaulting to 'index', anything else is confusing.         
+        if params["catalog_facet.sort"].blank? && params[ @browse_config.query_param_name ].present?
+          params["catalog_facet.sort"] = "index"
+        end
+
 
         @pagination = get_browse_facet_pagination(params[:id], params)
 
