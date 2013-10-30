@@ -1,0 +1,36 @@
+    <%# parts of implementation copied form  render_selected_facet_value -- 
+    we need to customize to do right with our browse normalized facet
+    values. The original BL helper methods are convoluted, we are
+    trying a single simpler partial instead.
+
+    Still calls out to other BL helpers. 
+
+    Required locals:
+    * item: A RSolr::Ext::Response::Facets::FacetItem (or more recent Blacklight equivalent)
+    * facet_field: the facet field name STRING, as configured in BL add_facet_field (later versions of BL this may be obtainable from the item?)
+
+    Assume access to "params", hash of Web params, including params[:id] with
+    the facet field name (as configured in BL facet_fields)
+    %>
+
+<%- 
+  plain_value = BlacklightFacetBrowse::NormalForm.extract_original(item.value)
+-%>
+
+<% if facet_in_params?( facet_field, plain_value ) %>
+    <%# selected facet %>
+    <%= content_tag(:span, :class => "selected label") do %>
+      <%= plain_value %>
+      <%= render_facet_count(item.hits) %>
+    <% end %>
+    <%= link_to(t('blacklight.search.facets.selected.remove'), remove_facet_params(facet_field, plain_value, params), :class=>"remove") %>  
+<% else %>
+    <%# not yet selected facet %>
+    <%= link_to(plain_value, add_facet_params_and_redirect(facet_field, plain_value), :class=>"facet_select label") %>
+    <%= render_facet_count(item.hits) %>
+<% end -%>
+
+
+
+
+

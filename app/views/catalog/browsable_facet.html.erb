@@ -34,18 +34,7 @@ in config variable 'browsable_facet_template'
     <ul class="facet_extended_list">
       <% @pagination.items.each do |item| %>
         <li>
-          <% if facet_in_params?( params[:id], item.value ) %>              
-            <%# selected facet %>
-            <%= content_tag(:span, :class => "selected label") do %>
-                <%= BlacklightFacetBrowse::NormalForm.extract_original(item.value) %>
-                <%= render_facet_count(item.hits) %>
-            <% end %>
-            <%= link_to(t('blacklight.search.facets.selected.remove'), remove_facet_params(params[:id], item.value, params), :class=>"remove") %>          
-          <% else %>
-            <%# not yet selected facet %>
-            <%= link_to(BlacklightFacetBrowse::NormalForm.extract_original(item.value), add_facet_params_and_redirect(params[:id], BlacklightFacetBrowse::NormalForm.extract_original(item.value)), :class=>"facet_select label") %>
-            <%= render_facet_count(item.hits) %>          
-          <% end -%>
+          <%= render "browsable_facet_value", :item => item, :facet_field => params[:id] %>
         </li>
       <% end %>
     </ul>
