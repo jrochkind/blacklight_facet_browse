@@ -15,6 +15,9 @@ module BlacklightFacetBrowse
   # by CI).  You can also send in custom pre-processing mappings (todo)
   #
   #
+  # The API methods used by callers are #sort_key and #search_key, 
+  # that's the Key Generator API ; other methods are mostly intended
+  # for internal use. 
   class KeyGeneratorV1
     def initialize(locale = :en)
       @collator = TwitterCldr::Collation::Collator.new(locale)

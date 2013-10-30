@@ -1,0 +1,69 @@
+<%# like Blacklight _facet_limit.html.erb , displays an individual
+    sidebar facet list. 
+
+    locals required:
+      * solr_field: name of facet field configured in BL configuration (passed in by standard BL)
+      * One of EITHER:
+        * display_facet: (passed in by standard BL)
+        * paginator: Blacklight::FacetPaginator, passed in by our BlacklightFacetBrowse
+          action, when retrieving AJAX results for sidebar. 
+
+    But we add a search
+    box, with ajax instant search -- we're actually
+    going to call out to the existing facet_limit, woot! 
+
+    If you want searchable box in sidebar facet, you configure
+    use of this partial in your facet configuration (such as in catalogcontroller),
+    eg
+
+        config.add_facet_field  "subject_topic_facet", :label => "Topic", 
+          :limit => true, :browse_field => "subject_topic_browse_facet",
+          :partial => "browsable_facet_limit"
+
+    Have to wrap the whole thing in a div to not confuse
+    expand/contract twiddle %>
+
+<%-
+unless local_assigns[:paginator]
+  paginator =    
+    Blacklight::Solr::FacetPaginator.new(display_facet.items,        
+      :limit => facet_limit_for(solr_field))
+end
+-%>
+
+<div>
+  <%= render "facet_browse_search_form", :browse_config =>  BlacklightFacetBrowse::ConfigInfo.new(blacklight_config, solr_field) %>
+
+  <%# div with data-instant-search="content" has to be there, for AJAX instant
+    search to pull out the right part to update on pate %>
+  <div data-instant-search="content" class="facet-browse-instant-search-content">
+    <%# based on stock BL "_facet_limit" partial, but we had to modify it
+        to do what we need. %>
+    <%# render "facet_limit", local_assigns.except(:browsable_facet_limit) %>
+
+
+    <ul>
+      <% paginator.items.each do |item| -%>
+        <li>
+        <% if facet_in_params?( solr_field, item.value ) %>              
+          <%# selected facet %>
+          <%= content_tag(:span, :class => "selected label") do %>
+              <%= BlacklightFacetBrowse::NormalForm.extract_original(item.value) %>
+              <%= render_facet_count(item.hits) %>
+          <% end %>
+          <%= link_to(t('blacklight.search.facets.selected.remove'), remove_facet_params(params[:id], item.value, params), :class=>"remove") %>  
+        <% else %>              
+          <%# not yet selected facet %>
+          <%= link_to(BlacklightFacetBrowse::NormalForm.extract_original(item.value), add_facet_params_and_redirect(params[:id], BlacklightFacetBrowse::NormalForm.extract_original(item.value)), :class=>"facet_select label") %>
+          <%= render_facet_count(item.hits) %>  
+        <% end -%>
+        </li>
+      <% end %>
+
+      <% if(paginator.has_next?)  %>
+        <li class="more_facets_link"><%= link_to(t('blacklight.search.facets.more'), params.merge(:id => solr_field, :action=>"facet"), :class => "more_facets_link") %></li>
+      <% end %>
+    </ul>
+
+  </div>
+</div>

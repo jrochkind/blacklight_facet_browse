@@ -49,7 +49,7 @@ module BlacklightFacetBrowse
       return solr_params
     end
   
-    # We override facet to use our custom views that can handle
+    # OVERRIDE #facet to use our custom views that can handle
     # browse normalized facets. If the facet isn't configured
     # for browse, we just call super though. 
     def facet
@@ -79,12 +79,24 @@ module BlacklightFacetBrowse
           # Json format copied from BL 4.4, there was no json response in
           # BL 3.5, we need one, sure let's use that one to try and be compat.  
           #format.json { render json: {response: {facets: @pagination }}}
-
         end
       end
     end
   
+    # This is a new action method added by this plugin. 
+    # It returns JUST the individual partial for a single sidebar facet--
+    # used for ajax 'starts with' search limiting.
+    def facet_limit_content
+      browse_config = BlacklightFacetBrowse::ConfigInfo.new(blacklight_config, params[:id])
+      pagination = get_facet_pagination(params[:id], params)
 
+      # Based off the Blacklight #render_facet_limit helper, but we
+      # can't just easily re-use it, for various reasons. 
+      #
+      # A bit fragile getting the right 'locals', what can you do. 
+      render :partial=>"browsable_facet_limit", :layout => false, 
+        :locals => {:display_facet => pagination, :solr_field => params[:id], :facet_field => browse_config.facet_field_config}
+    end
 
   end
 end
