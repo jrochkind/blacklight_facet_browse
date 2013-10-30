@@ -13,6 +13,9 @@ module BlacklightFacetBrowse
     def initialize(bconfig, ffield)
       self.blacklight_config  = bconfig
       self.facet_field = ffield
+
+
+      raise ArgumentError.new("Missing second argument facet name in ConfigInfo.new") if ffield.blank?
     end
 
     def general_config

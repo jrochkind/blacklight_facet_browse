@@ -10,7 +10,7 @@ in config variable 'browsable_facet_template'
 
 <div class="facet_extended_list">
 
-  <%= render "facet_browse_search_form" %>      
+  <%= render "facet_browse_search_form", :browse_config => @browse_config %>      
   
   <% sidebar_items << capture do %>
   <p><%= link_back_to_catalog %></p>

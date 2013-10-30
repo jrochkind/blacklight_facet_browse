@@ -22,4 +22,19 @@ describe "normal form" do
     end
   end
 
+  describe "extract_original" do
+
+    # If no seperator, just return original; to have a better failure
+    # mode, AND importantly so we can use this method in places
+    # it might be dealing with original facet content! This
+    # is actually part of API, needs to stay this way. 
+    it "just uses input as-is if no SEPERATOR" do
+      original = "This is just plain text, not normalized form."
+
+      normal_form = BlacklightFacetBrowse::NormalForm.extract_original(original)
+
+      assert_equal original, normal_form, "Output is same as input"
+    end
+  end
+
 end

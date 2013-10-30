@@ -1,17 +1,5 @@
 (function($) {
 
-  var deparam = function (querystring) {
-    // remove any preceding url and split
-    querystring = querystring.substring(querystring.indexOf('?')+1).split('&');
-    var params = {}, pair, d = decodeURIComponent;
-    // march and parse
-    for (var i = querystring.length - 1; i >= 0; i--) {
-      pair = querystring[i].split('=');
-      params[d(pair[0])] = d(pair[1]);
-    }
-
-    return params;
-  };//--  fn  deparam
 
   //debounce taken from underscore library. 
   var debounce = function(func, wait, immediate) {
@@ -45,10 +33,9 @@
     var uri      = form.attr("action");
     var q        = form.serialize();
 
-    var s = deparam(q)["facet.begins_with"]
-    console.log("update called, with field at " + s );
-
     $(this).closest("form").find(".facet-browse-loading").addClass("active")          
+
+    console.log("fetching for " + q)
 
     updates_in_progress++;
 
@@ -85,7 +72,7 @@
   // the shift key by itself, sorry -- we make sure to throttle,
   // and we're good. 
   // click catches html5 search input reset too. sigh. 
-  $(document).on("keyup click", "form.facet_browse_search input[type=search]", function() {
+  $(document).on("keyup click", ".facet_extended_list form.facet_browse_search input[type=search]", function() {
     // since we're watching keydown, we get false positives sometimes,
     // on shift key and such. so use a variable to make sure content has
     // really changed, or our throttling will end up executing no-op

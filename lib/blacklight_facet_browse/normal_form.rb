@@ -22,6 +22,12 @@ module BlacklightFacetBrowse
     # Extract an original source string out of facet browse normal form
     def extract_original(normal_form)
       start = normal_form.index(SEPERATOR)
+
+      # If no seperator, just return original; to have a better failure
+      # mode, AND importantly so we can use this method in places
+      # it might be dealing with original facet content!
+      return normal_form unless start
+
       range = (start+SEPERATOR.length)..(normal_form.length)
       return normal_form.slice( range  )
     end
