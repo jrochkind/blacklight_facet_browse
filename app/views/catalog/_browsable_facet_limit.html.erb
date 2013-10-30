@@ -4,7 +4,7 @@
     locals required:
       * solr_field: name of facet field configured in BL configuration (passed in by standard BL)
       * One of EITHER:
-        * display_facet: (passed in by standard BL)
+        * display_facet: passed in by standard BL, a RSolr::Ext::Response::Facets::FacetField -- or equivalent in more recent BL. 
         * paginator: Blacklight::FacetPaginator, passed in by our BlacklightFacetBrowse
           action, when retrieving AJAX results for sidebar.
 
@@ -22,7 +22,6 @@
 
     Have to wrap the whole thing in a div to not confuse
     expand/contract twiddle %>
-
 <%-
 unless local_assigns[:paginator]
   paginator =

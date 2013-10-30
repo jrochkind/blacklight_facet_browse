@@ -93,7 +93,7 @@ module BlacklightFacetBrowse
       partial       = browse_config.facet_field_config[:partial] || "browsable_facet_limit"
 
       render :partial=>partial, :layout => false, 
-        :locals => {:display_facet => pagination, :solr_field => params[:id], :facet_field => browse_config.facet_field_config}
+        :locals => {:paginator => pagination, :solr_field => params[:id], :facet_field => browse_config.facet_field_config}
     end
 
   end
