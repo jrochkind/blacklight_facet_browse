@@ -33,6 +33,14 @@
     var uri      = form.attr("action");
     var q        = form.serialize();
 
+    var ajax_uri = form.data("ajax-url");
+    if (ajax_uri === "disabled") {
+      // requested to do nothing please. 
+      return;
+    } else if (ajax_uri === undefined) {
+      ajax_uri = uri;
+    }
+
     $(this).closest("form").find(".facet-browse-loading").addClass("active")          
 
     console.log("fetching for " + q)
@@ -40,7 +48,7 @@
     updates_in_progress++;
 
     $.ajax({
-      url:      uri,
+      url:      ajax_uri,
       data:     q,
       dataType: "html",
       success: function(data) {
@@ -52,7 +60,7 @@
         // jquery "load" function feature
         var extracted_data = $("<div>").append( $.parseHTML( data ) ).find( replace_content_selector );
 
-        form.closest(".facet_extended_list").find(replace_content_selector).replaceWith(extracted_data); 
+        form.closest(".facet_list").find(replace_content_selector).replaceWith(extracted_data); 
 
         updates_in_progress--;
 
@@ -72,7 +80,7 @@
   // the shift key by itself, sorry -- we make sure to throttle,
   // and we're good. 
   // click catches html5 search input reset too. sigh. 
-  $(document).on("keyup click", ".facet_extended_list form.facet_browse_search input[type=search]", function() {
+  $(document).on("keyup click", "form.facet_browse_search input[type=search]", function() {
     // since we're watching keydown, we get false positives sometimes,
     // on shift key and such. so use a variable to make sure content has
     // really changed, or our throttling will end up executing no-op

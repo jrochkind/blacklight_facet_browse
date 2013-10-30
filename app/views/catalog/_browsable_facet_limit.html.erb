@@ -30,8 +30,12 @@ unless local_assigns[:paginator]
 end
 -%>
 
-<div>
-  <%= render "facet_browse_search_form", :browse_config =>  BlacklightFacetBrowse::ConfigInfo.new(blacklight_config, solr_field) %>
+<div class="facet_list facet_sidebar_list">
+
+  <%# don't show search form if all values fit on current page already %>
+  <% if paginator.has_next? %>
+    <%= render "facet_browse_search_form", :browse_config =>  BlacklightFacetBrowse::ConfigInfo.new(blacklight_config, solr_field), :ajax_url => catalog_facet_limit_content_path(solr_field) %>
+  <% end %>
 
   <%# div with data-instant-search="content" has to be there, for AJAX instant
     search to pull out the right part to update on pate %>

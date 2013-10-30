@@ -1,6 +1,15 @@
-<%# pass in local browse_config with a BlacklightFacetBrowse::ConfigInfo %>
+<%# pass in locals:
 
-<%= form_tag(catalog_facet_path(browse_config.facet_field), :method => :get, :class => "facet_browse_search") do %>
+  * `browse_config` (required) with a BlacklightFacetBrowse::ConfigInfo 
+  * 'ajax_url', optional, alternate URL to contact for HTML ajax search results. If
+                not given, JS will use ordinary form action. If set to string "disabled", JS
+                will be disabled. 
+%>
+
+<%- 
+  data = local_assigns[:ajax_url] ? {:ajax_url => ajax_url} : nil
+-%>
+<%= form_tag(catalog_facet_path(browse_config.facet_field), :method => :get, :class => "facet_browse_search", :data => data) do %>
   <%= search_field_tag browse_config.query_param_name, params[browse_config.query_param_name], :id => nil, :placeholder => "starting with…", :autocomplete => "off", :class => "facet-browse-search-q" %>
   <span class="facet-browse-loading"></span>
 

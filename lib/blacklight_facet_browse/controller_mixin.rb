@@ -88,7 +88,10 @@ module BlacklightFacetBrowse
     # used for ajax 'starts with' search limiting.
     def facet_limit_content
       browse_config = BlacklightFacetBrowse::ConfigInfo.new(blacklight_config, params[:id])
-      pagination    = get_facet_pagination(params[:id], params)
+
+      # insist on sorting alphabetically for our sidebar prefix limit,
+      # too confusing otherwise. 
+      pagination    = get_facet_pagination(params[:id], params.merge(:"facet.sort" => "index"))
 
       partial       = browse_config.facet_field_config[:partial] || "browsable_facet_limit"
 
