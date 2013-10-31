@@ -7,7 +7,7 @@ module BlacklightFacetBrowse
   # functionality -- important to include it AFTER the Blacklight mixins, so it
   # can override them. 
   module ControllerMixin
-
+    
     # OVERRIDING the original method of this name from Blacklight::SolrHelper. 
     # This method creates the query params for solr to fetch facet values
     # for a facet list. 
@@ -16,7 +16,8 @@ module BlacklightFacetBrowse
     # for facet begins-with browsing, properly formulated with calculated
     # search key -- only if so configured for a given facet!
     # 
-    def solr_facet_params(facet_field, user_params=params || {}, extra_controller_params={})
+    def solr_facet_params(facet_field, user_params=params || {}, extra_controller_params={})      
+
       # start out with default
       solr_params = super
 
@@ -85,8 +86,10 @@ module BlacklightFacetBrowse
           format.js { render @browse_config.browsable_facet_template, :layout => false }
 
           # Json format copied from BL 4.4, there was no json response in
-          # BL 3.5, we need one, sure let's use that one to try and be compat.  
-          #format.json { render json: {response: {facets: @pagination }}}
+          # BL 3.5, we need one, sure let's use that one to try and be compat -- 
+          # we intentionally don't use a hook method that lets someone redefine
+          # this, because if they redefine it our js won't understand it!
+          format.json { render json: {response: {facets: @pagination }}}
         end
       end
     end
@@ -103,7 +106,12 @@ module BlacklightFacetBrowse
       force_solr_params = {}
       if params[ browse_config.query_param_name ].present?
          force_solr_params[:"f.#{browse_field}.facet.sort"] = "index"
-       end
+      end
+      # Insist on the original configured per-field facet limit, since
+      # we're going to be in a sidebar here -- not the 20 per-page default
+      # for seperate window facet listing!
+      force_solr_params[:"f.#{browse_field}.facet.limit"] = facet_limit_for(params[:id])
+
       pagination    = get_browse_facet_pagination(params[:id], params, force_solr_params)
 
       partial       = browse_config.facet_field_config[:partial] || "browsable_facet_limit"
