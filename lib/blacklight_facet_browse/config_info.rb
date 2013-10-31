@@ -31,7 +31,7 @@ module BlacklightFacetBrowse
     end
 
     def query_param_name
-      facet_field_config["browse_param_name"] || general_config["browse_param_name"] || "facet.begins_with"
+      facet_field_config["browse_param_name"] || general_config["browse_param_name"] || "facet.starts_with"
     end
 
     # If we have a browse field, we consider browse
