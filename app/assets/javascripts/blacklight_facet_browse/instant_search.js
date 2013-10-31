@@ -86,8 +86,12 @@
     // really changed, or our throttling will end up executing no-op
     // searches and postponing real searches. 
     new_value = $(this).val();
-    if (last_value === null)
-      last_value = new_value;
+    if (last_value === null) {
+      //intentionally use DOM getAttribute to get _original_ html
+      // source 'value', not current value, which may have already
+      // changed as result of a click on 'reset' icon sometimes. 
+      last_value = this.getAttribute('value');
+    }
 
     if (new_value !== last_value) {
       console.log("actual change: " + new_value)
