@@ -60,6 +60,23 @@
         // jquery "load" function feature
         var extracted_data = $("<div>").append( $.parseHTML( data ) ).find( replace_content_selector );
 
+
+        // We need to attach our AJAX popup window behavior
+        // the the 'more' link, if any. This is doing it for BL 3.5, sorry
+        // will need something else in more recent Blacklight (or a patch to 
+        // more recent BL to use jquery 'on')
+        if (Blacklight !== undefined && 
+            Blacklight.do_more_facets_behavior !== undefined &&
+            Blacklight.do_more_facets_behavior.selector !== undefined &&
+            $.uiExt !== undefined &&
+            $.uiExt.ajaxyDialog !== undefined) {
+
+            extracted_data.find( Blacklight.do_more_facets_behavior.selector ).ajaxyDialog({
+              width: $(window).width() / 2,  
+              chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change"
+            });
+        }
+
         form.closest(".facet_list").find(replace_content_selector).replaceWith(extracted_data); 
 
         updates_in_progress--;
