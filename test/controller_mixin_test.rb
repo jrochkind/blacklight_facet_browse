@@ -73,6 +73,7 @@ describe BlacklightFacetBrowse::ControllerMixin do
     @controller = mock_controller_class.new
     @keygen = BlacklightFacetBrowse::KeyGeneratorV1.new
     @controller.blacklight_config = Conf.new(
+      :qt => "search",      
       :facet_browse => {
         :browse_key_generator => @keygen
       },
