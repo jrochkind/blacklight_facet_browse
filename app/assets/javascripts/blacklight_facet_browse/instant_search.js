@@ -97,6 +97,15 @@
 
         if (dom_data.updates_in_progress === 0)
           $(form).find(".facet-browse-loading").removeClass("active");
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        dom_data.updates_in_progress--;        
+        if (dom_data.updates_in_progress === 0)
+          $(form).find(".facet-browse-loading").removeClass("active");
+
+        var replace_content_selector = "*[data-instant-search=content]"
+
+        form.closest(".facet_list").find(replace_content_selector).html("Sorry, an error occured: " + textStatus + ' ' + errorThrown );
       }
     });
   };
