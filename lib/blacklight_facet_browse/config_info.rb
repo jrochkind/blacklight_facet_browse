@@ -30,8 +30,12 @@ module BlacklightFacetBrowse
       facet_field_config["browse_field"]
     end
 
+    # We started out trying to make this configurable, but
+    # there were other callers that needed it without knowing
+    # the particular field. So now it's a hard-coded global,
+    # but this method is a convenience. 
     def query_param_name
-      facet_field_config["browse_param_name"] || general_config["browse_param_name"] || "facet.starts_with"
+      BlacklightFacetBrowse::QUERY_PARAM
     end
 
     # If we have a browse field, we consider browse

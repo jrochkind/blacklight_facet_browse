@@ -23,10 +23,10 @@
       <%= plain_value %>
       <%= render_facet_count(item.hits) %>
     <% end %>
-    <%= link_to(t('blacklight.search.facets.selected.remove'), remove_facet_params(facet_field, plain_value, params), :class=>"remove") %>  
+    <%= link_to(t('blacklight.search.facets.selected.remove'), remove_facet_params(facet_field, plain_value, params).except(BlacklightFacetBrowse::QUERY_PARAM), :class=>"remove") %>  
 <% else %>
     <%# not yet selected facet %>
-    <%= link_to(plain_value, add_facet_params_and_redirect(facet_field, plain_value), :class=>"facet_select label") %>
+    <%= link_to(plain_value, add_facet_params_and_redirect(facet_field, plain_value).except(BlacklightFacetBrowse::QUERY_PARAM), :class=>"facet_select label") %>
     <%= render_facet_count(item.hits) %>
 <% end -%>
 
