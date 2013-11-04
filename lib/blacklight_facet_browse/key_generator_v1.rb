@@ -55,7 +55,17 @@ module BlacklightFacetBrowse
       # in pre-processing. 
       input = input.gsub(/\A[[:punct:][:space:]]+/u, '')
 
+      # em dash to two hyphens
+      input.gsub!(/\u2014/u, '--')
+      # en dash to one hyphen
+      input.gsub!(/\u2013/u, '-')
+
       return input
+    end
+
+    # Some 
+    def pre_process_map
+
     end
 
     # Takes a UCA sort key as an array of 16-bit ints,

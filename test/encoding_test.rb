@@ -76,6 +76,14 @@ describe "Encoding algorithm V1" do
     it "ignores leading white space" do
       equals " foo", "foo"
     end
+
+    it "equates em-dash and two hyphens" do
+      equals "foo--bar", "foo\u2014bar"
+    end
+
+    it "equates en-dash and one hyphen" do
+      equals "foo-bar", "foo\u2013bar"
+    end
   end
 
   describe "partial matching" do
