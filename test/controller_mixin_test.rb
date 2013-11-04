@@ -89,13 +89,13 @@ describe BlacklightFacetBrowse::ControllerMixin do
       @controller.blacklight_config[:facet_browse][:browse_key_generator] = nil
 
       assert_raises(ArgumentError) do
-        @controller.solr_facet_params("subject_facet", "facet.begins_with" => "foo")
+        @controller.solr_facet_params("subject_facet", BlacklightFacetBrowse::QUERY_PARAM => "foo")
       end
     end
 
     describe "for a non-configured field" do
       it "doesn't change superclass params" do
-        output = @controller.solr_facet_params("other_facet", "facet.begins_with" => "foo")
+        output = @controller.solr_facet_params("other_facet", BlacklightFacetBrowse::QUERY_PARAM => "foo")
         assert_equal @controller.original_output, output
       end
     end
@@ -110,7 +110,7 @@ describe BlacklightFacetBrowse::ControllerMixin do
 
     describe "for a configured field with begins_with" do
       it "changes facet.field and adds facet.prefix" do
-        output = @controller.solr_facet_params("subject_facet", "facet.begins_with" => "foo")
+        output = @controller.solr_facet_params("subject_facet", BlacklightFacetBrowse::QUERY_PARAM => "foo")
 
         assert_equal  "subject_browse_facet", output[:"facet.field"], "changes facet.field"
         assert output["facet.prefix"].present?, "adds facet.prefix"
@@ -120,7 +120,7 @@ describe BlacklightFacetBrowse::ControllerMixin do
       it "copies field-specific limit and sort" do
         @controller.original_output.merge!(:"f.subject_facet.facet.sort" => "index", :"f.subject_facet.facet.limit" => 25)
         
-        output = @controller.solr_facet_params("subject_facet", "facet.begins_with" => "foo")
+        output = @controller.solr_facet_params("subject_facet", BlacklightFacetBrowse::QUERY_PARAM => "foo")
 
         assert_equal 25,       output[:"f.subject_browse_facet.facet.limit"]
         assert_equal "index",  output[:"f.subject_browse_facet.facet.sort"]
