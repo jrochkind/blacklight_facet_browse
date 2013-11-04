@@ -84,6 +84,11 @@ describe "Encoding algorithm V1" do
     it "equates en-dash and one hyphen" do
       equals "foo-bar", "foo\u2013bar"
     end
+
+    it "ignores spaces around em or double hyphens" do
+      equals "foo -- bar", "foo--bar"
+      equals "foo \u2014 bar", "foo--bar"
+    end
   end
 
   describe "partial matching" do

@@ -55,9 +55,10 @@ module BlacklightFacetBrowse
       # in pre-processing. 
       input = input.gsub(/\A[[:punct:][:space:]]+/u, '')
 
-      # em dash to two hyphens
-      input.gsub!(/\u2014/u, '--')
-      # en dash to one hyphen
+      # em dash to two hyphens -- and erase spaces
+      # around em dash to normalize
+      input.gsub!(/ ?(\u2014|--) ?/u, '--')      
+      # en-dash to one hyphen
       input.gsub!(/\u2013/u, '-')
 
       return input
