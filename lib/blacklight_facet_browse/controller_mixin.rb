@@ -145,21 +145,19 @@ module BlacklightFacetBrowse
       request_handler = blacklight_config.qt || blacklight_config.solr_request_handler
       response =find(request_handler, solr_params)
 
-      # This is a BL 3.5 version of finding limit, master doesn't look
-      # at :facet_list_limit?
-      limit =       
-        if respond_to?(:facet_list_limit)
-          facet_list_limit.to_s.to_i
-        elsif solr_params[:"f.#{facet_field}.facet.limit"]
-          solr_params[:"f.#{facet_field}.facet.limit"] - 1
-        else
-          nil
-        end
-      
-      # Actually create the paginator!
-      # NOTE: The sniffing of the proper sort from the solr response is not
-      # currently tested for, tricky to figure out how to test, since the
-      # default setup we test against doesn't use this feature. 
+      browse_config = BlacklightFacetBrowse::ConfigInfo.new(blacklight_config, params[:id])
+      browse_field  = browse_config.browse_field
+
+      # Figure out the number of facets requested from solr,
+      # so we can set the FacetPaginator properly -- we figure
+      # this out either from the solr_params we requested with,
+      # or we have to sniff the actual response. 
+      sp = solr_params.stringify_keys
+      limit_plus_one = sp["f.#{browse_field}.facet.limit"] || sp["facet.limit"] || 
+        response["responseHeader"]["params"]["f.#{browse_field}.facet.limit"] || 
+        response["responseHeader"]["params"]["facet.limit"]
+      limit = limit_plus_one - 1
+
       return     Blacklight::Solr::FacetPaginator.new(response.facets.first.items, 
         :offset => solr_params[:"f.#{facet_field}.facet.offset"] || solr_params['facet.offset'], 
         :limit => limit,
