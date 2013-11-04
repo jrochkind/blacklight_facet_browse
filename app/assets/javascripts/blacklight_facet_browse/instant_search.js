@@ -1,6 +1,17 @@
 (function($) {
 
 
+  var browse_data = function(element) {
+    var data = $(element).data("facet_browse");
+
+    if (data === undefined) {
+      data = $(element).data("facet_browse", {})
+    }
+
+    return data;
+  }
+
+
   //debounce taken from underscore library. 
   var debounce = function(func, wait, immediate) {
     var timeout, args, context, timestamp, result;
@@ -25,9 +36,12 @@
       return result;
     };
   };
-
-  var updates_in_progress = 0;
+  
   var update = function(text_field) {
+    var dom_data = browse_data(text_field);
+    if (dom_data.updates_in_progress === undefined)
+      dom_data.updates_in_progress = 0;
+
 
     var form     = $(text_field).closest("form");
     var uri      = form.attr("action");
@@ -45,20 +59,20 @@
 
     console.log("fetching for " + q)
 
-    updates_in_progress++;
+    dom_data.updates_in_progress++;
 
     $.ajax({
       url:      ajax_uri,
       data:     q,
       dataType: "html",
-      success: function(data) {
+      success: function(response) {
         console.log("results in")
 
         var replace_content_selector = "*[data-instant-search=content]"
 
         // pull out just the div we want, using code copied from
         // jquery "load" function feature
-        var extracted_data = $("<div>").append( $.parseHTML( data ) ).find( replace_content_selector );
+        var partial_html = $("<div>").append( $.parseHTML( response ) ).find( replace_content_selector );
 
 
         // We need to attach our AJAX popup window behavior
@@ -71,25 +85,23 @@
             $.uiExt !== undefined &&
             $.uiExt.ajaxyDialog !== undefined) {
 
-            extracted_data.find( Blacklight.do_more_facets_behavior.selector ).ajaxyDialog({
+            partial_html.find( Blacklight.do_more_facets_behavior.selector ).ajaxyDialog({
               width: $(window).width() / 2,  
               chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change"
             });
         }
 
-        form.closest(".facet_list").find(replace_content_selector).replaceWith(extracted_data); 
+        form.closest(".facet_list").find(replace_content_selector).replaceWith(partial_html); 
 
-        updates_in_progress--;
+        dom_data.updates_in_progress--;
 
-        if (updates_in_progress === 0)
+        if (dom_data.updates_in_progress === 0)
           $(form).find(".facet-browse-loading").removeClass("active");
       }
     });
   };
-  update = debounce(update, 400);
 
 
-  var last_value = null;
   // Add behavior to the text field, register on document
   // with delegation, so we get forms added to the page
   // with ajax. 
@@ -98,25 +110,35 @@
   // and we're good. 
   // click catches html5 search input reset too. sigh. 
   $(document).on("keyup click", "form.facet_browse_search input[type=search]", function() {
+    var data = browse_data(this);
+    
+    // Have to create the debounced one inside the function
+    // and attached to the specific input, 
+    // so it's debounced per input field. 
+    if (data.update === undefined)
+      data.update = debounce(update, 400);
+
+
+
     // since we're watching keydown, we get false positives sometimes,
     // on shift key and such. so use a variable to make sure content has
     // really changed, or our throttling will end up executing no-op
     // searches and postponing real searches. 
-    new_value = $(this).val();
-    if (last_value === null) {
+    var new_value = $(this).val();
+    if (data.last_value === undefined) {
       //intentionally use DOM getAttribute to get _original_ html
       // source 'value', not current value, which may have already
       // changed as result of a click on 'reset' icon sometimes. 
-      last_value = this.getAttribute('value');
+      data.last_value = this.getAttribute('value') || "";
     }
 
-    if (new_value !== last_value) {
+    if (new_value !== data.last_value) {
       console.log("actual change: " + new_value)
-      last_value = new_value;
+      data.last_value = new_value;
 
       $(this).closest("form").find(".facet-browse-loading").addClass("active")
 
-      update(this);
+      data.update(this);
     }
   });
 
