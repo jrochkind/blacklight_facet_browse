@@ -76,19 +76,6 @@ describe "Encoding algorithm V1" do
     it "ignores leading white space" do
       equals " foo", "foo"
     end
-
-    it "equates em-dash and two hyphens" do
-      equals "foo--bar", "foo\u2014bar"
-    end
-
-    it "equates en-dash and one hyphen" do
-      equals "foo-bar", "foo\u2013bar"
-    end
-
-    it "ignores spaces around em or double hyphens" do
-      equals "foo -- bar", "foo--bar"
-      equals "foo \u2014 bar", "foo--bar"
-    end
   end
 
   describe "partial matching" do
@@ -142,6 +129,30 @@ describe "Encoding algorithm V1" do
       in_sort_order '"alpha"', "beta", '"delta"', "epsilon", "'gamma'"
     end
 
+  end
+
+  describe "hyphen normalization" do
+    it "equates em-dash and two hyphens" do
+      equals "foo--bar", "foo\u2014bar"
+    end
+
+    it "equates en-dash and one hyphen" do
+      equals "foo-bar", "foo\u2013bar"
+    end
+
+    it "ignores spaces around em or double hyphens" do
+      equals "foo -- bar", "foo--bar"
+      equals "foo \u2014 bar", "foo--bar"
+    end
+
+    it "finds prefix normalized" do
+      matched_by("United States --", "United States — Bibliography")
+      matched_by("United States --", "United States -- Bibliography")
+      matched_by("United States -- ", "United States -- Bibliography")
+      matched_by("United States -- B", "United States — Bibliography")
+      matched_by("United States--", "United States — Bibliography")
+      matched_by("United States--B", "United States — Bibliography")
+    end
   end
   
 end
