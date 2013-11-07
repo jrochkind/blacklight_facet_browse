@@ -57,7 +57,7 @@
 
     $(this).closest("form").find(".facet-browse-loading").addClass("active")          
 
-    console.log("fetching for " + q)
+    console.log(logTime() + "fetching for " + q)
 
     dom_data.updates_in_progress++;
 
@@ -66,7 +66,7 @@
       data:     q,
       dataType: "html",
       success: function(response) {
-        console.log("results in")
+        console.log(logTime() + "results in")
 
         var replace_content_selector = "*[data-instant-search=content]"
 
@@ -76,19 +76,18 @@
 
 
         // We need to attach our AJAX popup window behavior
-        // the the 'more' link, if any. This is doing it for BL 3.5, sorry
+        // to nav links in the new page we're loading. This is doing it for BL 3.5, sorry
         // will need something else in more recent Blacklight (or a patch to 
-        // more recent BL to use jquery 'on')
+        // more recent BL to use jquery 'on') as well as more recnet
+        // code for modals. 
         if (Blacklight !== undefined && 
-            Blacklight.do_more_facets_behavior !== undefined &&
-            Blacklight.do_more_facets_behavior.selector !== undefined &&
             $.uiExt !== undefined &&
             $.uiExt.ajaxyDialog !== undefined) {
 
-            partial_html.find( Blacklight.do_more_facets_behavior.selector ).ajaxyDialog({
+            partial_html.find("a.next_page, a.prev_page, a.sort_change").ajaxyDialog({
               width: $(window).width() / 2,  
-              chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change"
-            });
+              chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change" 
+            });      
         }
 
         form.closest(".facet_list").find(replace_content_selector).replaceWith(partial_html); 
@@ -151,7 +150,10 @@
     }
   });
 
-
+  function logTime() {
+    d = new Date();
+    return d.toLocaleTimeString() + " " + d.getMilliseconds();
+  }
 
 
 
