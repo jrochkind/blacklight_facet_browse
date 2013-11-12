@@ -74,33 +74,8 @@
         // jquery "load" function feature
         var partial_html = $("<div>").append( $.parseHTML( response ) ).find( replace_content_selector );
 
-
-        // We need to attach our AJAX popup window behavior
-        // to nav links in the new page we're loading. This is doing it for BL 3.5, sorry
-        // will need something else in more recent Blacklight (or a patch to 
-        // more recent BL to use jquery 'on') as well as more recnet
-        // code for modals. 
-        if (Blacklight !== undefined && 
-            $.uiExt !== undefined &&
-            $.uiExt.ajaxyDialog !== undefined) {
-
-            // For ajax loads in the sidebar, find any 'more' links
-            // and make sure they will trigger load in modal. 
-            partial_html.find("a.more_facets_link").ajaxyDialog({
-              width: $(window).width() / 2,  
-              chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change"        
-            });
-            
-
-            // For already being inside the modal, find next/previous/sort 
-            // buttons and make sure they will trigger
-            // load inside the modal. 
-            partial_html.find("a.next_page, a.prev_page, a.sort_change").ajaxyDialog({
-              width: $(window).width() / 2,  
-              chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change" 
-            });      
-        }
-
+        window.Blacklight.facetBrowse.addHandlersToContent(partial_html);
+        
         form.closest(".facet_list").find(replace_content_selector).replaceWith(partial_html); 
 
         dom_data.updates_in_progress--;
@@ -160,6 +135,59 @@
       data.update(this);
     }
   });
+
+  // When we execute an 'instant search', putting search results
+  // on the screen with AJAX -- we need to make sure links within
+  // those ajax-loaded search results are themselves properly enhanced
+  // for ajax actions:
+  //
+  // 1. 'more' links in sidebar content need to be enhanced to load
+  //     in js modal, not via browser nav. 
+  // 2. When already in a modal dialog, and loading content from prefix
+  //    search, next/prev/sort navigational links in loaded content
+  //    need to be enhanced to stay within modal. 
+  //
+  // This code is for Blacklight 3.5 and won't work with future bootstrapped
+  // BL. Future BL _may_ not need any code like this at all, if it properly 
+  // implements ajaxy behavior with JQuery 'on' on a body element. Alternately,
+  // if future BL still needs logic, it will need to be _different_ than
+  // this BL 3.5 compatible logic. 
+  // 
+  // So we provide the logic in an attribute of the Blacklight object,
+  // so local apps can over-ride it with a no-op function or other
+  // logic. 
+  if (window.Blacklight === undefined) {
+    window.Blacklight = {};
+  }
+  if (window.Blacklight.facet_browse === undefined) {
+    window.Blacklight.facetBrowse = {};
+  }
+  // only define if not already defined, define your own logic
+  // first if you want. 
+  if (window.Blacklight.facetBrowse.addHandlersToContent === undefined) {
+    window.Blacklight.facetBrowse.addHandlersToContent = function(partial_html) {
+        // Can only do anything if ajaxyDialog jquery plugin is loaded (BL 3.5)
+        if (Blacklight !== undefined && 
+            $.uiExt !== undefined &&
+            $.uiExt.ajaxyDialog !== undefined) {
+
+            // For ajax loads in the sidebar, find any 'more' links
+            // and make sure they will trigger load in modal. 
+            partial_html.find("a.more_facets_link").ajaxyDialog({
+              width: $(window).width() / 2,  
+              chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change"        
+            });
+            
+            // For already being inside the modal, find next/previous/sort 
+            // buttons and make sure they will trigger
+            // load inside the modal. 
+            partial_html.find("a.next_page, a.prev_page, a.sort_change").ajaxyDialog({
+              width: $(window).width() / 2,  
+              chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change" 
+            });      
+        }
+    };    
+  }
 
   function logTime() {
     d = new Date();
