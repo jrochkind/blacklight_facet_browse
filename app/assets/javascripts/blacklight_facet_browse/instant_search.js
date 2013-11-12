@@ -84,6 +84,17 @@
             $.uiExt !== undefined &&
             $.uiExt.ajaxyDialog !== undefined) {
 
+            // For ajax loads in the sidebar, find any 'more' links
+            // and make sure they will trigger load in modal. 
+            partial_html.find("a.more_facets_link").ajaxyDialog({
+              width: $(window).width() / 2,  
+              chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change"        
+            });
+            
+
+            // For already being inside the modal, find next/previous/sort 
+            // buttons and make sure they will trigger
+            // load inside the modal. 
             partial_html.find("a.next_page, a.prev_page, a.sort_change").ajaxyDialog({
               width: $(window).width() / 2,  
               chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change" 
