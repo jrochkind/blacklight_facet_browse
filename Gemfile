@@ -17,5 +17,5 @@ gemspec
 gem 'debugger', :platform => :mri
 
 # use locally patched one for now
-gem 'twitter_cldr', :path => "../twitter-cldr-rb"
+#gem 'twitter_cldr', :path => "../twitter-cldr-rb"
 

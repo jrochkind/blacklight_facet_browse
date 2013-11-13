@@ -17,7 +17,8 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
 
   s.add_dependency "unicode_utils", "~> 1.4"
-  s.add_dependency "twitter_cldr", "~> 2.4"
+  # Need twitter_cldr 3.0 for maximum_level on sort keys
+  s.add_dependency "twitter_cldr", ">= 3.0.0.beta1" 
   s.add_dependency "unidecoder", ">= 1.1.2"
 
   s.add_development_dependency "minitest-rails"
