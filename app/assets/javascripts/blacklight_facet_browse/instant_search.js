@@ -74,9 +74,12 @@
         // jquery "load" function feature
         var partial_html = $("<div>").append( $.parseHTML( response ) ).find( replace_content_selector );
 
-        window.Blacklight.facetBrowse.addHandlersToContent(partial_html);
+        // the element that's gonna get replaced with our new stuff
+        var target_element = form.closest(".facet_list").find(replace_content_selector);
+
+        window.Blacklight.facetBrowse.addHandlersToContent(partial_html, target_element);
         
-        form.closest(".facet_list").find(replace_content_selector).replaceWith(partial_html); 
+        target_element.replaceWith(partial_html); 
 
         dom_data.updates_in_progress--;
 
@@ -165,7 +168,7 @@
   // only define if not already defined, define your own logic
   // first if you want. 
   if (window.Blacklight.facetBrowse.addHandlersToContent === undefined) {
-    window.Blacklight.facetBrowse.addHandlersToContent = function(partial_html) {
+    window.Blacklight.facetBrowse.addHandlersToContent = function(partial_html, target_element) {
         // Can only do anything if ajaxyDialog jquery plugin is loaded (BL 3.5)
         if (Blacklight !== undefined && 
             $.uiExt !== undefined &&
@@ -180,11 +183,13 @@
             
             // For already being inside the modal, find next/previous/sort 
             // buttons and make sure they will trigger
-            // load inside the modal. 
-            partial_html.find("a.next_page, a.prev_page, a.sort_change").ajaxyDialog({
-              width: $(window).width() / 2,  
-              chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change" 
-            });      
+            // load inside the modal -- if it's already in a jquery-ui dialog!
+            if (target_element.closest(".ui-dialog").size() > 0) {
+              partial_html.find("a.next_page, a.prev_page, a.sort_change").ajaxyDialog({
+                width: $(window).width() / 2,  
+                chainAjaxySelector: "a.next_page, a.prev_page, a.sort_change" 
+              });
+            }
         }
     };    
   }
